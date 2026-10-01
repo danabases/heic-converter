@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 
-def find_images(inputs: list[Path], output_dir: Path, extension: str) -> list[tuple[Path, Path]]:
+def find_images(inputs: list[Path], output_dir: Path, extension: str, recursive: bool = False) -> list[tuple[Path, Path]]:
     jobs: list[tuple[Path, Path]] = []
     seen_sources: set[Path] = set()
     seen_targets: dict[str, Path] = {}
@@ -24,7 +24,7 @@ def find_images(inputs: list[Path], output_dir: Path, extension: str) -> list[tu
         elif item.is_dir():
             candidates = [
                 (source, source.relative_to(item))
-                for source in sorted(item.rglob("*"))
+                for source in sorted(item.rglob("*") if recursive else item.iterdir())
                 if source.is_file() and source.suffix.lower() == ".heic"
             ]
         else:
@@ -101,7 +101,8 @@ def convert(source: Path, target: Path, image_format: str, max_dimension: int | 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("inputs", nargs="+", type=Path, help="HEIC files and/or folders (folders are searched recursively)")
+    parser.add_argument("inputs", nargs="+", type=Path, help="HEIC files and/or folders")
+    parser.add_argument("--all", dest="recursive", action="store_true", help="Include HEIC files in subfolders")
     parser.add_argument("--f", dest="format", choices=("png", "jpg", "webp", "avif"), default="png", help="Output format (default: png)")
     parser.add_argument("--o", dest="output_dir", type=Path, default=Path("output"), metavar="PATH", help="Output folder (default: ./output)")
     parser.add_argument("--s", dest="max_dimension", type=int, metavar="PIXELS", help="Maximum length of the longest edge in pixels; keeps aspect ratio")
@@ -136,7 +137,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
 
     try:
-        jobs = find_images(args.inputs, args.output_dir, f".{args.format}")
+        jobs = find_images(args.inputs, args.output_dir, f".{args.format}", args.recursive)
     except ValueError as exc:
         parser.error(str(exc))
     if not jobs:

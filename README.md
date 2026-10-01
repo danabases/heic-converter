@@ -1,6 +1,6 @@
 # HEIC photo converter
 
-Convert `.heic` photos to PNG, JPG, WebP, or AVIF. You can give the tool one file, several files, or a folder. It searches folders recursively and leaves the originals untouched.
+Convert `.heic` photos to PNG, JPG, WebP, or AVIF. You can give the tool one file, several files, or a folder. Folder conversion includes files directly in that folder by default. Add `--all` to include subfolders. The originals stay untouched.
 
 ## Install
 
@@ -22,39 +22,49 @@ py -m venv .venv
 
 ## Convert a file
 
-These examples read `photo.heic` from the `images` folder and write `photo.png` to an `output` folder beside the project folder. Run the command from the project folder.
+These examples read `./images/photo.heic` and write `./output/photo.png`. Run the commands from the project folder.
 
 macOS:
 
 ```bash
-./.venv/bin/python convert_heic.py "./images/photo.heic" --o "../output/" --f png
+./.venv/bin/python convert_heic.py ./images/photo.heic --o ./output --f png
 ```
 
 Windows:
 
 ```powershell
-.\.venv\scripts\python.exe convert_heic.py ".\images\photo.heic" --o "..\output\" --f png
+.\.venv\scripts\python.exe convert_heic.py ./images/photo.heic --o ./output --f png
 ```
 
-The value after `--o` is the output folder path. For example, on Windows you can use `--o "c:\output"` for an absolute path. The tool creates the folder if needed.
+The value after `--o` is the output folder path. `./output` means a folder inside the project folder. The tool creates it if needed.
 
 ## Convert a folder
 
-To convert every `.heic` file under `images`, including its subfolders:
+To convert the `.heic` files directly in `./images`:
 
 macOS:
 
 ```bash
-./.venv/bin/python convert_heic.py "./images" --o "./output" --f jpg
+./.venv/bin/python convert_heic.py ./images --o ./output --f jpg
 ```
 
 Windows:
 
 ```powershell
-.\.venv\scripts\python.exe convert_heic.py ".\images" --o ".\output" --f jpg
+.\.venv\scripts\python.exe convert_heic.py ./images --o ./output --f jpg
 ```
 
-The output keeps the input's subfolder structure. Each output file keeps the source name with a new extension.
+Add `--all` to include files in subfolders:
+
+```bash
+./.venv/bin/python convert_heic.py ./images --o ./output --f jpg --all
+```
+
+```powershell
+.\.venv\scripts\python.exe convert_heic.py ./images --o ./output --f jpg --all
+```
+
+With `--all`, the output keeps the input's subfolder structure. Each output file keeps the source name with a new extension.
 
 ## Switches
 
@@ -63,6 +73,7 @@ The output keeps the input's subfolder structure. Each output file keeps the sou
 | `--o PATH` | Output folder. Default: `./output`. |
 | `--f FORMAT` | `png`, `jpg`, `webp`, or `avif`. Default: `png`. |
 | `--x` | Replace output files that already exist. Without it, existing files are skipped. |
+| `--all` | Include `.heic` files in subfolders of an input folder. |
 | `--s PIXELS` | Limit the longest edge to this many pixels. |
 | `--w PIXELS` | Limit the width to this many pixels. |
 | `--h PIXELS` | Limit the height to this many pixels. |
@@ -70,7 +81,7 @@ The output keeps the input's subfolder structure. Each output file keeps the sou
 The resize switches keep the photo's proportions and never enlarge it. You can use `--w` or `--h` alone, or both together to fit within a width × height box. If you also use `--s`, the tightest limits apply. For example:
 
 ```powershell
-.\.venv\scripts\python.exe convert_heic.py ".\images\photo.heic" --o ".\output" --f png --w 1200 --h 800
+.\.venv\scripts\python.exe convert_heic.py ./images/photo.heic --o ./output --f png --w 1200 --h 800
 ```
 
 Add `--x` to regenerate an output file after changing its size.
